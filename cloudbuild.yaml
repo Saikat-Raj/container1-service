@@ -1,0 +1,27 @@
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA', '.']
+# Push the container image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA']
+# Deploy container image to GKE
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - 'set'
+  - 'image'
+  - 'deployment/container1'
+  - 'container1=gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA'
+  - '--namespace=microservices'
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=microservices-cluster'
+# Tag as latest for easy reference
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag', 'gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA', 'gcr.io/$PROJECT_ID/container1-service:latest']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/container1-service:latest']
+
+images:
+- 'gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA'
+- 'gcr.io/$PROJECT_ID/container1-service:latest'
