@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Set environment variables for configuration
 CONTAINER2_URL = os.environ.get('CONTAINER2_URL', 'http://container2-service:5001')
-STORAGE_PATH = os.environ.get('STORAGE_PATH', '/xxxx_PV_dir')
+STORAGE_PATH = os.environ.get('STORAGE_PATH', '/saikat_PV_dir')
 
 # Ensure storage directory exists
 os.makedirs(STORAGE_PATH, exist_ok=True)
