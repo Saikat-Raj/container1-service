@@ -1,0 +1,83 @@
+# Keep your PV the same, but update the entire deployment to ensure proper scheduling
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: microservices
+
+---
+# Persistent Volume for the disk created by Terraform
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: microservices-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  hostPath:
+    path: "/var/data"
+
+---
+# Persistent Volume Claim to use the PV
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: microservices-pvc
+  namespace: microservices
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+
+---
+# Container 1 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: container1
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: container1
+  template:
+    metadata:
+      labels:
+        app: container1
+    spec:
+      containers:
+      - name: container1
+        image: us-central1-docker.pkg.dev/container-app-454314/container-app/container1:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: data-volume
+          mountPath: /saikat_PV_dir
+        env:
+        - name: CONTAINER2_URL
+          value: "http://localhost:5001"
+      - name: container2
+        image: us-central1-docker.pkg.dev/container-app-454314/container-app/container2:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+        volumeMounts:
+        - name: data-volume
+          mountPath: /saikat_PV_dir
+        env:
+        - name: STORAGE_PATH
+          value: "/saikat_PV_dir"
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: microservices-pvc
