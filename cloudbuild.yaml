@@ -15,7 +15,7 @@ steps:
   - '--namespace=microservices'
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=microservices-cluster'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=k8asgn'
 # Tag as latest for easy reference
 - name: 'gcr.io/cloud-builders/docker'
   args: ['tag', 'gcr.io/$PROJECT_ID/container1-service:$COMMIT_SHA', 'gcr.io/$PROJECT_ID/container1-service:latest']
